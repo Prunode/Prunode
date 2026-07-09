@@ -1,6 +1,11 @@
 <div align="center">
   <img src="./vscode-extension/icon.svg" alt="Prunode Logo" width="150" height="150">
   <h1>Prunode</h1>
+  <p>
+    <a href="https://www.npmjs.com/package/prunode"><img src="https://img.shields.io/npm/v/prunode.svg" alt="npm version"></a>
+    <a href="https://github.com/bijanmurmu/prunode/actions/workflows/release-please.yml"><img src="https://github.com/bijanmurmu/prunode/actions/workflows/release-please.yml/badge.svg" alt="Release Please"></a>
+    <a href="https://github.com/bijanmurmu/prunode/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/prunode.svg" alt="License"></a>
+  </p>
 </div>
 
 

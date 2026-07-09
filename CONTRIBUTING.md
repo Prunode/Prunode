@@ -2,6 +2,9 @@
 
 We welcome contributions to extend Prunode's framework and language support!
 
+## 🙋 Claiming an Issue
+If you find an open issue you would like to work on, simply leave a comment with **`/assign`**. Our GitHub bot will automatically assign the issue to you so others know you are working on it!
+
 ## Local Setup
 1. Clone the repository and run `npm install`.
 2. Build the project: `npm run build`.

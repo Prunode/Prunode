@@ -2,115 +2,139 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export interface Route {
-    method: string;
-    path: string;
-    sourceFile: string;
-    payloadKeys: string[];
-    deadFields?: string[];
-    startPos?: number;
-    endPos?: number;
-    usedByComponents?: string[]; // newly added
+  method: string;
+  path: string;
+  sourceFile: string;
+  payloadKeys: string[];
+  deadFields?: string[];
+  startPos?: number;
+  endPos?: number;
+  usedByComponents?: string[]; // newly added
 }
 
 export interface ApiCall {
-    method: string;
-    path: string;
-    sourceFile: string;
-    expectedKeys?: string[];
-    componentName?: string;
+  method: string;
+  path: string;
+  sourceFile: string;
+  expectedKeys?: string[];
+  componentName?: string;
 }
 
 export class PrunodeGraph {
-    public routes: Route[] = [];
-    public calls: ApiCall[] = [];
+  public routes: Route[] = [];
+  public calls: ApiCall[] = [];
 
-    addRoute(route: Route) {
-        route.deadFields = [];
-        route.usedByComponents = [];
-        this.routes.push(route);
-    }
+  addRoute(route: Route) {
+    route.deadFields = [];
+    route.usedByComponents = [];
+    this.routes.push(route);
+  }
 
-    addCall(call: ApiCall) {
-        if (!call.expectedKeys) call.expectedKeys = [];
-        this.calls.push(call);
-    }
+  addCall(call: ApiCall) {
+    if (!call.expectedKeys) call.expectedKeys = [];
+    this.calls.push(call);
+  }
 
-    private normalizePath(p: string): string {
-        return p.replace(/:[^/]+/g, '*').replace(/\$\{[^}]+\}/g, '*');
-    }
+  private normalizePath(p: string): string {
+    return p.replace(/:[^/]+/g, '*').replace(/\$\{[^}]+\}/g, '*');
+  }
 
-    resolve() {
-        const deadRoutes: Route[] = [];
-        
-        for (const route of this.routes) {
-            const normalizedBackend = this.normalizePath(route.path);
-            let isCalled = false;
-            let allExpectedKeys: Set<string> = new Set();
+  resolve() {
+    const deadRoutes: Route[] = [];
 
-            for (const call of this.calls) {
-                const callMethod = call.method === 'UNKNOWN' ? 'GET' : call.method;
-                const normalizedFrontend = this.normalizePath(call.path);
-                
-                if (normalizedFrontend === normalizedBackend && (callMethod === route.method || callMethod === 'ANY')) {
-                    isCalled = true;
-                    call.expectedKeys?.forEach(k => allExpectedKeys.add(k));
-                    if (call.componentName) {
-                        route.usedByComponents?.push(call.componentName);
-                    }
-                }
-            }
+    for (const route of this.routes) {
+      const normalizedBackend = this.normalizePath(route.path);
+      let isCalled = false;
+      const allExpectedKeys: Set<string> = new Set();
 
-            if (!isCalled) {
-                deadRoutes.push(route);
-            } else {
-                // Blast Radius validation
-                route.deadFields = route.payloadKeys.filter(key => !allExpectedKeys.has(key));
-            }
+      for (const call of this.calls) {
+        const callMethod = call.method === 'UNKNOWN' ? 'GET' : call.method;
+        const normalizedFrontend = this.normalizePath(call.path);
+
+        if (
+          normalizedFrontend === normalizedBackend &&
+          (callMethod === route.method || callMethod === 'ANY')
+        ) {
+          isCalled = true;
+          call.expectedKeys?.forEach((k) => allExpectedKeys.add(k));
+          if (call.componentName) {
+            route.usedByComponents?.push(call.componentName);
+          }
         }
-        return deadRoutes;
+      }
+
+      if (!isCalled) {
+        deadRoutes.push(route);
+      } else {
+        // Blast Radius validation
+        route.deadFields = route.payloadKeys.filter(
+          (key) => !allExpectedKeys.has(key),
+        );
+      }
     }
+    return deadRoutes;
+  }
 
-    generateHTML(): string {
-        const nodes: any[] = [];
-        const edges: any[] = [];
-        const addedNodes = new Set<string>();
+  generateHTML(): string {
+    const nodes: any[] = [];
+    const edges: any[] = [];
+    const addedNodes = new Set<string>();
 
-        let deadCount = 0;
-        this.routes.forEach(r => {
-            const id = `${r.method} ${r.path}`;
-            const isDead = !this.calls.some(c => this.normalizePath(c.path) === this.normalizePath(r.path));
-            if (isDead) deadCount++;
-            
-            if (!addedNodes.has(id)) {
-                nodes.push({ data: { id, label: id, type: 'backend', isDead } });
-                addedNodes.add(id);
-            }
+    let deadCount = 0;
+    this.routes.forEach((r) => {
+      const id = `${r.method} ${r.path}`;
+      const isDead = !this.calls.some(
+        (c) => this.normalizePath(c.path) === this.normalizePath(r.path),
+      );
+      if (isDead) deadCount++;
+
+      if (!addedNodes.has(id)) {
+        nodes.push({ data: { id, label: id, type: 'backend', isDead } });
+        addedNodes.add(id);
+      }
+    });
+
+    this.calls.forEach((c) => {
+      const compId = c.componentName || c.sourceFile;
+      if (!addedNodes.has(compId)) {
+        nodes.push({
+          data: {
+            id: compId,
+            label: c.componentName || 'Frontend',
+            type: 'frontend',
+          },
         });
+        addedNodes.add(compId);
+      }
 
-        this.calls.forEach(c => {
-            const compId = c.componentName || c.sourceFile;
-            if (!addedNodes.has(compId)) {
-                nodes.push({ data: { id: compId, label: c.componentName || 'Frontend', type: 'frontend' } });
-                addedNodes.add(compId);
-            }
-            
-            const targetId = `${c.method === 'UNKNOWN' ? 'GET' : c.method} ${c.path}`;
-            // If backend node doesn't exist perfectly, we create a ghost node
-            const matchedBackend = this.routes.find(r => this.normalizePath(r.path) === this.normalizePath(c.path));
-            const finalTargetId = matchedBackend ? `${matchedBackend.method} ${matchedBackend.path}` : targetId;
-            
-            if (!addedNodes.has(finalTargetId)) {
-                nodes.push({ data: { id: finalTargetId, label: finalTargetId, type: 'backend', isDead: false } });
-                addedNodes.add(finalTargetId);
-            }
+      const targetId = `${c.method === 'UNKNOWN' ? 'GET' : c.method} ${c.path}`;
+      // If backend node doesn't exist perfectly, we create a ghost node
+      const matchedBackend = this.routes.find(
+        (r) => this.normalizePath(r.path) === this.normalizePath(c.path),
+      );
+      const finalTargetId = matchedBackend
+        ? `${matchedBackend.method} ${matchedBackend.path}`
+        : targetId;
 
-            edges.push({ data: { source: compId, target: finalTargetId } });
+      if (!addedNodes.has(finalTargetId)) {
+        nodes.push({
+          data: {
+            id: finalTargetId,
+            label: finalTargetId,
+            type: 'backend',
+            isDead: false,
+          },
         });
+        addedNodes.add(finalTargetId);
+      }
 
-        const activeCount = this.routes.length - deadCount;
-        const callCount = this.calls.length;
+      edges.push({ data: { source: compId, target: finalTargetId } });
+    });
 
-        return `<!DOCTYPE html>
+    const activeCount = this.routes.length - deadCount;
+    const callCount = this.calls.length;
+
+    return `<!DOCTYPE html>
 <html>
 <head>
     <title>Prunode Interactive Dashboard</title>
@@ -178,5 +202,5 @@ export class PrunodeGraph {
     </script>
 </body>
 </html>`;
-    }
+  }
 }
