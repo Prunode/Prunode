@@ -1,9 +1,9 @@
 import * as ts from 'typescript';
 
 function main() {
-    console.log("Initializing Prunode Parser Engine (Native TypeScript AST)...");
+  console.log('Initializing Prunode Parser Engine (Native TypeScript AST)...');
 
-    const sourceCode = `
+  const sourceCode = `
 import express from 'express';
 const app = express();
 
@@ -20,58 +20,63 @@ app.post('/api/v1/legacy-auth', (req, res) => {
 app.listen(3000);
     `;
 
-    // 1. Parse the AST using the official TypeScript Compiler API
-    const sourceFile = ts.createSourceFile(
-        'backend.ts',
-        sourceCode,
-        ts.ScriptTarget.Latest,
-        true
-    );
-    console.log("✅ AST Successfully Generated in Memory!");
+  // 1. Parse the AST using the official TypeScript Compiler API
+  const sourceFile = ts.createSourceFile(
+    'backend.ts',
+    sourceCode,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  console.log('✅ AST Successfully Generated in Memory!');
 
-    console.log("\n🔍 Scanning AST for Backend Endpoints...");
-    const extractedRoutes: Array<{ method: string, route: string }> = [];
+  console.log('\n🔍 Scanning AST for Backend Endpoints...');
+  const extractedRoutes: Array<{ method: string; route: string }> = [];
 
-    // 2. Traverse the AST to find Express route definitions
-    function traverse(node: ts.Node) {
-        if (ts.isCallExpression(node)) {
-            const expression = node.expression;
-            
-            // Look for things like `app.get`
-            if (ts.isPropertyAccessExpression(expression)) {
-                const objectName = expression.expression.getText(sourceFile);
-                const methodName = expression.name.text;
+  // 2. Traverse the AST to find Express route definitions
+  function traverse(node: ts.Node) {
+    if (ts.isCallExpression(node)) {
+      const expression = node.expression;
 
-                if (objectName === 'app' && ['get', 'post', 'put', 'delete', 'patch'].includes(methodName)) {
-                    // Extract the route string (e.g., '/api/v1/users')
-                    const firstArg = node.arguments[0];
-                    if (firstArg && ts.isStringLiteral(firstArg)) {
-                        extractedRoutes.push({
-                            method: methodName.toUpperCase(),
-                            route: firstArg.text
-                        });
-                    }
-                }
-            }
+      // Look for things like `app.get`
+      if (ts.isPropertyAccessExpression(expression)) {
+        const objectName = expression.expression.getText(sourceFile);
+        const methodName = expression.name.text;
+
+        if (
+          objectName === 'app' &&
+          ['get', 'post', 'put', 'delete', 'patch'].includes(methodName)
+        ) {
+          // Extract the route string (e.g., '/api/v1/users')
+          const firstArg = node.arguments[0];
+          if (firstArg && ts.isStringLiteral(firstArg)) {
+            extractedRoutes.push({
+              method: methodName.toUpperCase(),
+              route: firstArg.text,
+            });
+          }
         }
-        
-        // Recursively walk through all children in the tree
-        ts.forEachChild(node, traverse);
+      }
     }
 
-    traverse(sourceFile);
+    // Recursively walk through all children in the tree
+    ts.forEachChild(node, traverse);
+  }
 
-    if (extractedRoutes.length === 0) {
-        console.log("No routes found.");
-        return;
-    }
+  traverse(sourceFile);
 
-    extractedRoutes.forEach(r => {
-        console.log(`  🟢 Found Backend Endpoint: [${r.method}] ${r.route}`);
-    });
+  if (extractedRoutes.length === 0) {
+    console.log('No routes found.');
+    return;
+  }
 
-    console.log("\n🚀 Success! The AST engine is fully functional.");
-    console.log("🚀 Next Step: Diff these routes against frontend fetch() calls to find dead code!");
+  extractedRoutes.forEach((r) => {
+    console.log(`  🟢 Found Backend Endpoint: [${r.method}] ${r.route}`);
+  });
+
+  console.log('\n🚀 Success! The AST engine is fully functional.');
+  console.log(
+    '🚀 Next Step: Diff these routes against frontend fetch() calls to find dead code!',
+  );
 }
 
 main();

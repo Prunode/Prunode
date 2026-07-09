@@ -21,6 +21,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci || npm install
 
+      - name: Check Code Formatting
+        run: npx prettier --check "src/**/*.ts"
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
       - name: Run Prunode Scan
         # This will fail the PR if dead code is found, thanks to process.exit(1)
-        run: npx tsx src/index.ts scan .
+        run: npm run scan

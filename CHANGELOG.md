@@ -4,6 +4,14 @@ All notable changes to the Prunode Core Engine and VS Code Extension will be doc
 
 ## [1.0.0] - Initial Release
 ### Added
+- **Community Standards**: Added `CODE_OF_CONDUCT.md` and `SECURITY.md`.
+- **Contribution Templates**: Added GitHub Issue templates (Bug, Feature) and Pull Request template.
+- **Testing Infrastructure**: Added `vitest` for completely free, fast automated testing.
+- **Code Quality**: Set up ESLint and Prettier for code linting and formatting.
+- **Automated Releases**: Implemented Release Please workflow for automated versioning and changelog generation.
+- **Project Badges**: Added standard status badges to the README.
+- **Issue ChatOps**: Added a GitHub Action bot to allow contributors to claim issues using `/assign`.
+- **Comprehensive CI Pipeline**: Upgraded Pull Request workflows to automatically verify code formatting, linting, and tests alongside dead-code checks.
 - **Core Engine Integration**: Full integration of the Prunode AST directed-graph engine.
 - **Auto-Fix Pruning (`--prune`)**: The CLI can now automatically slice dead backend code out of your source files.
 - **Visual Architecture Graph (`--html`)**: Generates an interactive, standalone D3/Cytoscape HTML file visualizing your entire frontend and backend node graph.
