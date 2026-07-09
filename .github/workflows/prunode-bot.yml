@@ -1,0 +1,51 @@
+name: Prunode CI/CD Reviewer
+
+on:
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  prunode-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Prunode
+        run: npm install -g prunode
+
+      - name: Run Prunode Scan (SARIF output)
+        run: prunode scan . --sarif
+        continue-on-error: true
+
+      - name: Run Prunode Scan (Text output for PR Comment)
+        id: scan
+        run: |
+          OUTPUT=$(prunode scan .)
+          # Escape newlines for GitHub Actions
+          OUTPUT="${OUTPUT//'%'/'%25'}"
+          OUTPUT="${OUTPUT//$'\n'/'%0A'}"
+          OUTPUT="${OUTPUT//$'\r'/'%0D'}"
+          echo "scan_output=$OUTPUT" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Post PR Comment
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const output = \`${{ steps.scan.outputs.scan_output }}\`;
+            if (output.includes('ORPHAN / DEAD')) {
+              const body = `### ⚠️ Prunode Code Review\n\nI detected **Dead API Endpoints** introduced or left orphaned by this Pull Request. Please clean them up before merging!\n\n\`\`\`\n${output.split('SARIF')[0]}\n\`\`\``;
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              })
+            }

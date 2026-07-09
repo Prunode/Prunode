@@ -1,0 +1,43 @@
+{
+  "name": "prunode",
+  "version": "1.0.0",
+  "description": "Enterprise Cross-Language Dead Code & Blast Radius Engine",
+  "main": "dist/index.js",
+  "bin": {
+    "prunode": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "scan": "tsx src/index.ts scan"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "dead-code",
+    "ast",
+    "typescript",
+    "nextjs",
+    "express",
+    "cli",
+    "static-analysis",
+    "linter"
+  ],
+  "author": "bijanmurmu",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bijanmurmu/prunode.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^15.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.23.0"
+  }
+}

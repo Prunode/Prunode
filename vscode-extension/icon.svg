@@ -1,0 +1,25 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ultra Minimalist Professional Background -->
+  <rect width="256" height="256" rx="56" fill="#09090B"/>
+  
+  <g transform="translate(128, 128) scale(1.35) translate(-136, -132)">
+    <!-- Main stem -->
+    <path d="M 128 190 L 128 136" stroke="#EDEDED" stroke-width="12" stroke-linecap="round"/>
+    
+    <!-- Left branch (Intact) -->
+    <path d="M 128 136 L 76 84" stroke="#EDEDED" stroke-width="12" stroke-linecap="round"/>
+    
+    <!-- Right branch (Intact part) -->
+    <path d="M 128 136 L 152 112" stroke="#EDEDED" stroke-width="12" stroke-linecap="round"/>
+    
+    <!-- Right branch (Severed and falling part) -->
+    <path d="M 172 108 L 196 84" stroke="#EF4444" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Nodes (Hollow geometric circles) -->
+    <circle cx="128" cy="136" r="12" fill="#09090B" stroke="#EDEDED" stroke-width="8"/>
+    <circle cx="76" cy="84" r="12" fill="#09090B" stroke="#EDEDED" stroke-width="8"/>
+    
+    <!-- Dead Node -->
+    <circle cx="196" cy="84" r="12" fill="#09090B" stroke="#EF4444" stroke-width="8"/>
+  </g>
+</svg>

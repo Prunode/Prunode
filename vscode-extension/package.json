@@ -1,0 +1,48 @@
+{
+  "name": "prunode-vscode",
+  "publisher": "bijanmurmu",
+  "author": {
+    "name": "Bijan Murmu",
+    "url": "https://github.com/bijanmurmu"
+  },
+  "displayName": "Prunode",
+  "description": "Enterprise Dead Code & Blast Radius Engine",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bijanmurmu/prunode.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "activationEvents": [
+    "onCommand:prunode.scan"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prunode.scan",
+        "title": "Prunode: Scan for Dead Endpoints"
+      },
+      {
+        "command": "prunode.prune",
+        "title": "Prunode: Auto-Delete Dead Code"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && node -e \"require('fs').copyFileSync('../CHANGELOG.md', 'CHANGELOG.md')\"",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.1.0"
+  }
+}
