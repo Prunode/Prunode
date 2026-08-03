@@ -22,14 +22,14 @@ jobs:
         run: npm ci || npm install
 
       - name: Check Code Formatting
-        run: npx prettier --check "src/**/*.ts"
+        run: npx prettier --check "packages/**/*.ts"
 
       - name: Run Linter
-        run: npm run lint
+        run: npm run lint --workspaces --if-present
 
       - name: Run Tests
-        run: npm test
+        run: npm test --workspaces --if-present
 
       - name: Run Prunode Scan
         # This will fail the PR if dead code is found, thanks to process.exit(1)
-        run: npx tsx src/index.ts scan .
+        run: npx tsx packages/cli/src/index.ts scan .
