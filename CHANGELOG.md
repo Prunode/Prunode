@@ -2,6 +2,13 @@
 
 All notable changes to the Prunode Core Engine and VS Code Extension will be documented in this file.
 
+## 1.0.0 (2026-08-03)
+
+
+### Bug Fixes
+
+* update workflow paths to use packages directory ([b5a9187](https://github.com/Prunode/Prunode/commit/b5a9187ef0f2ff997fcf72027032610c2cbec0e1))
+
 ## [1.0.0] - Initial Release
 ### Added
 - **Community Standards**: Added `CODE_OF_CONDUCT.md` and `SECURITY.md`.
