@@ -17,4 +17,5 @@ jobs:
         env:
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
         with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           release-type: node
